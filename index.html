@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TATA CS - Game Tik Tak Tok</title>
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+    color: white;
+    background: radial-gradient(circle at center, #1e272e, #000);
+  }
+
+  /* 🌌 Efek bintang */
+  .stars {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    animation: moveStars 8s linear infinite;
+    opacity: 0.7;
+  }
+
+  @keyframes moveStars {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(800px); opacity: 0; }
+  }
+
+  h1 {
+    font-size: 3em;
+    color: #00cec9;
+    text-shadow: 0 0 15px #00cec9, 0 0 30px #0984e3;
+  }
+
+  #status {
+    font-size: 1.2em;
+    margin: 10px;
+  }
+
+  button {
+    background: #00cec9;
+    color: white;
+    border: none;
+    padding: 12px 22px;
+    font-size: 1.1em;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  button:hover {
+    background: #74b9ff;
+    transform: scale(1.1);
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 8px;
+    margin: 20px 0;
+  }
+
+  .cell {
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 3px 6px rgba(255,255,255,0.2);
+  }
+
+  .cell:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.05);
+  }
+
+  .winner {
+    animation: winnerFlash 0.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes winnerFlash {
+    from { background: #00cec9; transform: scale(1.1); }
+    to { background: #55efc4; transform: scale(1.2); }
+  }
+
+  .mode-select, .player-inputs {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  input, select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: none;
+    outline: none;
+    font-size: 1em;
+  }
+
+  #startScreen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+  }
+
+  #startScreen h1 {
+    font-size: 3.5em;
+    color: #00cec9;
+    text-shadow: 0 0 20px #00cec9;
+    animation: pulse 1.5s infinite alternate;
+  }
+
+  @keyframes pulse {
+    from { transform: scale(1); opacity: 0.8; }
+    to { transform: scale(1.05); opacity: 1; }
+  }
+
+  @media (max-width: 480px) {
+    .board {
+      grid-template-columns: repeat(3, 80px);
+      grid-template-rows: repeat(3, 80px);
+    }
+    .cell {
+      font-size: 2.2em;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- 🌠 Bintang latar -->
+<script>
+  for (let i = 0; i < 100; i++) {
+    const star = document.createElement('div');
+    star.className = 'stars';
+    star.style.left = Math.random() * 100 + 'vw';
+    star.style.animationDelay = Math.random() * 5 + 's';
+    star.style.animationDuration = (5 + Math.random() * 5) + 's';
+    document.body.appendChild(star);
+  }
+</script>
+
+<!-- 🎮 Layar Awal -->
+<div id="startScreen">
+  <h1>🌟 TATA CS 🌟</h1>
+  <p>Klik tombol di bawah untuk mulai bermain!</p>
+  <button id="startGameBtn">▶️ Mulai Game</button>
+</div>
+
+<h1 style="display:none;">TATA CS - Tik Tak Tok</h1>
+<div id="status" style="display:none;">Pilih mode permainan dulu!</div>
+
+<div class="mode-select" style="display:none;">
+  <select id="mode">
+    <option value="solo">🎮 Mode Solo (Lawan Komputer)</option>
+    <option value="2p">👥 Mode 2 Pemain</option>
+  </select>
+  <button id="chooseMode">Pilih</button>
+</div>
+
+<div class="player-inputs" style="display:none;">
+  <input id="playerX" placeholder="Nama Pemain X">
+  <input id="playerO" placeholder="Nama Pemain O (atau Komputer)">
+  <button id="startBtn">Mulai</button>
+</div>
+
+<div class="board" id="board" style="display:none;">
+  <div class="cell" data-index="0"></div>
+  <div class="cell" data-index="1"></div>
+  <div class="cell" data-index="2"></div>
+  <div class="cell" data-index="3"></div>
+  <div class="cell" data-index="4"></div>
+  <div class="cell" data-index="5"></div>
+  <div class="cell" data-index="6"></div>
+  <div class="cell" data-index="7"></div>
+  <div class="cell" data-index="8"></div>
+</div>
+
+<button id="reset" style="display:none;">🔁 Ulangi</button>
+
+<!-- 🔊 Suara -->
+<audio id="clickSound" src="saund.mp3"></audio>
+<audio id="winSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_48e5c73ee7.mp3?filename=success-1-6297.mp3"></audio>
+<audio id="drawSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_44d1b3e54d.mp3?filename=error-2-36058.mp3"></audio>
+<audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2023/04/11/audio_d5c4bb4e8a.mp3?filename=happy-day-153983.mp3" loop></audio>
+
+<script>
+  const board = document.getElementById('board');
+  const cells = document.querySelectorAll('.cell');
+  const status = document.getElementById('status');
+  const resetBtn = document.getElementById('reset');
+  const chooseModeBtn = document.getElementById('chooseMode');
+  const startBtn = document.getElementById('startBtn');
+  const playerXInput = document.getElementById('playerX');
+  const playerOInput = document.getElementById('playerO');
+  const modeSelect = document.getElementById('mode');
+  const startScreen = document.getElementById('startScreen');
+  const startGameBtn = document.getElementById('startGameBtn');
+
+  const clickSound = document.getElementById('clickSound');
+  const winSound = document.getElementById('winSound');
+  const drawSound = document.getElementById('drawSound');
+  const bgMusic = document.getElementById('bgMusic');
+
+  let playerX = "Pemain X";
+  let playerO = "Pemain O";
+  let currentPlayer = "X";
+  let boardState = Array(9).fill("");
+  let mode = "solo";
+
+  const winPatterns = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+
+  // Musik otomatis ketika halaman dimulai
+  document.addEventListener("DOMContentLoaded", () => {
+    bgMusic.volume = 0.3;
+    const playMusic = () => {
+      bgMusic.play().catch(()=>{});
+      document.removeEventListener("click", playMusic);
+    };
+    document.addEventListener("click", playMusic);
+  });
+
+  // Klik tombol mulai di layar awal
+  startGameBtn.addEventListener("click", () => {
+    clickSound.play();
+    bgMusic.play();
+    startScreen.style.display = "none";
+    document.querySelector("h1").style.display = "block";
+    status.style.display = "block";
+    document.querySelector(".mode-select").style.display = "flex";
+  });
+
+  chooseModeBtn.addEventListener("click", () => {
+    mode = modeSelect.value;
+    document.querySelector(".mode-select").style.display = "none";
+    document.querySelector(".player-inputs").style.display = "flex";
+    if (mode === "solo") {
+      playerOInput.value = "Komputer 🤖";
+      playerOInput.disabled = true;
+    } else {
+      playerOInput.value = "";
+      playerOInput.disabled = false;
+    }
+    status.textContent = "Masukkan nama pemain lalu mulai!";
+  });
+
+  startBtn.addEventListener("click", () => {
+    clickSound.play();
+    playerX = playerXInput.value || "Pemain X";
+    playerO = playerOInput.value || "Pemain O";
+    currentPlayer = "X";
+    status.textContent = `Giliran: ${playerX} (X)`;
+    board.style.display = "grid";
+    resetBtn.style.display = "inline-block";
+    document.querySelector(".player-inputs").style.display = "none";
+  });
+
+  function handleClick(e) {
+    const index = e.target.dataset.index;
+    if (boardState[index] !== "") return;
+    clickSound.play();
+    boardState[index] = currentPlayer;
+    e.target.textContent = currentPlayer;
+
+    if (checkWinner()) return;
+
+    if (mode === "solo") {
+      currentPlayer = "O";
+      status.textContent = `Giliran: ${playerO}`;
+      setTimeout(computerMove, 700);
+    } else {
+      currentPlayer = currentPlayer === "X" ? "O" : "X";
+      status.textContent = `Giliran: ${currentPlayer === "X" ? playerX : playerO} (${currentPlayer})`;
+    }
+  }
+
+  function computerMove() {
+    const emptyCells = boardState.map((val, i) => val === "" ? i : null).filter(v => v !== null);
+    if (emptyCells.length === 0) return;
+    const move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    boardState[move] = "O";
+    cells[move].textContent = "O";
+    clickSound.play();
+    if (!checkWinner()) {
+      currentPlayer = "X";
+      status.textContent = `Giliran: ${playerX} (X)`;
+    }
+  }
+
+  function checkWinner() {
+    for (const pattern of winPatterns) {
+      const [a,b,c] = pattern;
+      if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+        [a,b,c].forEach(i => cells[i].classList.add("winner"));
+        const winnerName = boardState[a] === "X" ? playerX : playerO;
+        status.textContent = `🏆 ${winnerName} MENANG!`;
+        winSound.play();
+        cells.forEach(cell => cell.style.pointerEvents = "none");
+        return true;
+      }
+    }
+    if (!boardState.includes("")) {
+      status.textContent = "😅 SERI!";
+      drawSound.play();
+      return true;
+    }
+    return false;
+  }
+
+  function resetGame() {
+    boardState.fill("");
+    cells.forEach(cell => {
+      cell.textContent = "";
+      cell.classList.remove("winner");
+      cell.style.pointerEvents = "auto";
+    });
+    currentPlayer = "X";
+    status.textContent = `Giliran: ${playerX} (X)`;
+    clickSound.play();
+  }
+
+  cells.forEach(cell => cell.addEventListener("click", handleClick));
+  resetBtn.addEventListener("click", resetGame);
+</script>
+</body>
+</html>
